@@ -1,0 +1,4 @@
+github.com/buildkite/terminal-to-html/v3 v3.16.0 h1:BbAgSK3tLEVocul3QLWn5pazyMzWilEeSmnq2LGcFAM=
+github.com/buildkite/terminal-to-html/v3 v3.16.0/go.mod h1:gBOS1jmZ+/ze1lpunGDIZpjCk3MkYZ4E80Y7/26Um0c=
+github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
+github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=

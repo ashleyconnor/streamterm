@@ -1,0 +1,423 @@
+/* streamterm
+   ---------------------------------------------------------------------------
+   Two accent colours carry the entire idea of the project, so they are used
+   for nothing else:
+
+     teal  = finalized. Written down, numbered, never revised.
+     amber = live. Still inside the emulated screen, still rewritable.
+
+   Everything else is deliberately quiet: a cool paper surface with a dark
+   inset well, so the terminal reads as an instrument set into a panel rather
+   than as the page itself. */
+
+:root {
+  --paper:  #e4e7e9;
+  --card:   #f7f8f9;
+  --ink:    #171b20;
+  --muted:  #626e78;
+  --faint:  #8b959d;
+  --rule:   #c4cbd0;
+  --well:   #10141a;
+  --well-2: #171d25;
+
+  --final:  #0e6e63;
+  --final-dim: #0e6e6322;
+  --live:   #a24e00;
+  --live-dim:  #a24e0018;
+  --bad:    #a52619;
+
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Menlo,
+          Consolas, "Liberation Mono", monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+
+  --gap: 18px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Labels and structural type are set in mono with wide tracking. The subject
+   is bytes on a wire; the interface reads like the instrument that measures
+   them rather than like a marketing page. */
+.stage-n, .field-label, .chip, .pane-head h2, .btn, .seam-label, .wire-kind {
+  font-family: var(--mono);
+  text-transform: lowercase;
+  letter-spacing: 0.08em;
+}
+
+/* ---------------------------------------------------------------- header -- */
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 20px var(--gap) 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+
+.brand-mark { color: var(--final); font-size: 18px; line-height: 1; }
+
+.brand h1 {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.brand-sub { margin: 0; color: var(--muted); font-size: 13px; }
+
+.controls { display: flex; align-items: flex-end; gap: 10px; }
+
+.field { display: flex; flex-direction: column; gap: 4px; }
+
+.field-label { font-size: 10px; color: var(--faint); }
+
+select, .btn {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+
+select { min-width: 150px; }
+
+.btn:hover:not(:disabled) { background: #fff; border-color: var(--muted); }
+.btn:disabled { opacity: 0.4; cursor: default; }
+
+.btn-primary {
+  background: var(--final);
+  border-color: var(--final);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) { background: #0b5a51; border-color: #0b5a51; }
+
+.btn-small { padding: 5px 9px; font-size: 11px; }
+
+:focus-visible { outline: 2px solid var(--final); outline-offset: 2px; }
+
+/* -------------------------------------------------------------- pipeline -- */
+
+.pipeline {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  border-bottom: 1px solid var(--rule);
+  background: var(--card);
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 11px 14px;
+  border-right: 1px solid var(--rule);
+  min-width: 0;
+}
+.stage:last-child { border-right: 0; }
+
+/* An arrow between stages, because the strip is a data path and not a set of
+   unrelated statistics. */
+.stage + .stage { position: relative; }
+.stage + .stage::before {
+  content: "→";
+  position: absolute;
+  left: -7px;
+  top: 12px;
+  color: var(--faint);
+  font-size: 11px;
+  background: var(--card);
+  line-height: 1;
+}
+
+.stage-n { font-size: 10px; color: var(--faint); }
+
+.stage-v {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stage-d {
+  font-size: 11px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------------- panes -- */
+
+.panes {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+  gap: var(--gap);
+  padding: var(--gap);
+  align-items: start;
+}
+
+.pane { min-width: 0; }
+
+.pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 8px;
+}
+
+.pane-head h2 { margin: 0; font-size: 11px; font-weight: 600; color: var(--muted); }
+
+.pane-tools { display: flex; align-items: center; gap: 10px; }
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.chip {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  color: var(--muted);
+  background: var(--card);
+}
+.chip[data-state="running"]   { color: var(--live);  border-color: var(--live);  background: var(--live-dim); }
+.chip[data-state="succeeded"] { color: var(--final); border-color: var(--final); background: var(--final-dim); }
+.chip[data-state="failed"],
+.chip[data-state="error"]     { color: var(--bad);   border-color: var(--bad);   background: #a5261914; }
+
+/* ------------------------------------------------------------------ well -- */
+
+/* The well scrolls in both axes. A terminal line is a row of a fixed cols×rows
+   grid, so it must not reflow to the width of the viewport: wrapping breaks
+   column alignment, which is exactly what the progress bar and the colour ramp
+   are there to demonstrate. Panning is the honest way to show a line wider than
+   the pane. */
+.well {
+  background: var(--well);
+  border: 1px solid #000;
+  border-radius: 4px;
+  max-height: 68vh;
+  overflow: auto;
+  padding: 6px 0;
+  scrollbar-color: #39424e var(--well);
+  overscroll-behavior-x: contain;
+}
+
+.empty { padding: 34px 20px; color: #6c7885; }
+.empty p { margin: 0; font-family: var(--mono); font-size: 13px; }
+.empty-sub { margin-top: 6px !important; color: #4d5763; font-size: 12px !important; }
+
+/* The two regions are distinguished by a left rule rather than by a background
+   wash, so the terminal's own colours stay true. */
+.region { border-left: 2px solid transparent; }
+.region-final { border-left-color: var(--final); }
+.region-live  { border-left-color: var(--live); background: #ffffff05; }
+
+/* terminal.css sets its own background, padding and radius on .term-container.
+   The well already provides those, so they are reset here — the vendored
+   stylesheet is left untouched so it can be re-fetched at its pinned version. */
+.well .term-container {
+  background: transparent;
+  border-radius: 0;
+  padding: 0 14px;
+  font-size: 12px;
+  line-height: 19px;
+  /* terminal.css ships `pre-wrap` + `break-word`. Both are wrong for a bounded
+     screen — see the note on .well. */
+  white-space: pre;
+  overflow-wrap: normal;
+  /* Size the block to its widest line so every row is equally wide. A sticky
+     child can only slide within its own containing block, so rows of differing
+     widths would pin their line numbers at differing offsets — a ragged gutter
+     as soon as the reader pans sideways. */
+  width: max-content;
+  min-width: 100%;
+}
+
+.well .term-container:empty { display: none; }
+
+/* Line numbers come from markup rather than from a counter, so the finalized
+   log stays selectable and copyable as plain text.
+
+   Rows fill their container, which is itself as wide as the widest line, so
+   every row shares one width — the :target highlight spans the full pane and
+   the sticky gutter below pins uniformly. */
+#finalized .ln, #live .wl {
+  width: auto;
+}
+
+#finalized .ln::before {
+  /* The number comes from the envelope, not from a CSS counter: trimming old
+     nodes out of the DOM must not renumber the lines that remain. */
+  content: attr(data-n);
+  /* Sticky, not absolute: the gutter stays legible while a long line is panned
+     sideways. */
+  position: sticky;
+  left: 0;
+  display: inline-block;
+  /* The `*` reset above does NOT match pseudo-elements, so this box would be
+     content-box and 46+10=56px wide — putting every finalized line 10px right
+     of every live one, a visible step where the two regions meet. The gutter
+     must total exactly the 46px that `#live .wl` pads by. */
+  box-sizing: border-box;
+  /* The separating gap is padding, not margin, so the opaque background covers
+     it too — otherwise a panned line shows through between number and text. */
+  width: 46px;
+  padding-right: 10px;
+  text-align: right;
+  color: #4a5563;
+  background: var(--well);
+  user-select: none;
+}
+#finalized .ln:target::before { color: var(--live); }
+#finalized .ln:target { background: #a24e0022; }
+
+/* Matches the gutter width above (36px + 10px) so live rows sit on the same
+   column as finalized ones. */
+#live .wl { padding-left: 46px; }
+
+/* `display` here would otherwise beat the UA rule for the `hidden` attribute,
+   leaving the seam labelling an empty live window before a run and after one
+   ends. app.js toggles `hidden`, so that has to keep winning. */
+.seam[hidden] { display: none; }
+
+.seam {
+  display: flex;
+  align-items: baseline;
+  position: sticky;
+  left: 0;
+  gap: 10px;
+  margin: 6px 0;
+  padding: 0 14px 0 0;
+  border-top: 1px dashed #3a4450;
+  padding-top: 5px;
+}
+
+.seam-label {
+  font-size: 9px;
+  color: var(--live);
+  padding-left: 14px;
+  white-space: nowrap;
+}
+
+.seam-note {
+  font-size: 10px;
+  color: #55606d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notices { padding: 4px 14px 0; }
+
+.notice {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #e0a15c;
+  border-left: 2px solid var(--live);
+  padding: 4px 10px;
+  margin: 6px 0;
+  background: #a24e0022;
+}
+
+/* ------------------------------------------------------------------ wire -- */
+
+.pane-hint { margin: 0 0 10px; font-size: 12px; color: var(--muted); }
+
+.wire {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.wire li {
+  display: grid;
+  grid-template-columns: 44px 62px minmax(0, 1fr);
+  gap: 8px;
+  padding: 5px 10px;
+  border-bottom: 1px solid #e2e6e8;
+  animation: settle 220ms ease-out;
+}
+.wire li:last-child { border-bottom: 0; }
+
+@keyframes settle { from { opacity: 0; transform: translateY(-2px); } }
+
+.wire-seq { color: var(--faint); font-variant-numeric: tabular-nums; text-align: right; }
+
+.wire-kind { font-size: 10px; }
+.wire-kind[data-kind="line"]   { color: var(--final); }
+.wire-kind[data-kind="window"] { color: var(--live); }
+.wire-kind[data-kind="status"],
+.wire-kind[data-kind="meta"]   { color: var(--muted); }
+.wire-kind[data-kind="notice"] { color: var(--bad); }
+
+.wire-body {
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wire-foot { margin: 8px 0 0; font-size: 12px; }
+.wire-foot a { color: var(--final); }
+
+/* --------------------------------------------------------------- responsive */
+
+@media (max-width: 1000px) {
+  .panes { grid-template-columns: minmax(0, 1fr); }
+  .pipeline { grid-template-columns: repeat(3, 1fr); }
+  .stage:nth-child(3n) { border-right: 0; }
+  .stage:nth-child(-n+3) { border-bottom: 1px solid var(--rule); }
+  .stage:nth-child(4)::before { content: none; }
+  .well { max-height: 55vh; }
+}
+
+@media (max-width: 620px) {
+  .bar { align-items: stretch; }
+  .controls { width: 100%; }
+  .pipeline { grid-template-columns: repeat(2, 1fr); }
+  .stage:nth-child(3n) { border-right: 1px solid var(--rule); }
+  .stage:nth-child(2n) { border-right: 0; }
+  .stage::before { content: none !important; }
+  .stage-d { display: none; }
+  .seam-note { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wire li { animation: none; }
+  * { scroll-behavior: auto !important; }
+}

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>streamterm — a read-only shell in a browser</title>
+<link rel="stylesheet" href="/vendor/terminal.css">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand">
+    <span class="brand-mark">▚</span>
+    <h1>streamterm</h1>
+    <p class="brand-sub">bash output, rendered server-side, streamed as envelopes</p>
+  </div>
+
+  <div class="controls">
+    <label class="field">
+      <span class="field-label">script</span>
+      <select id="script"></select>
+    </label>
+    <!-- Off = append-only: a one-row screen, so every line is committed as
+         soon as it is complete and no window envelope is ever sent. This is
+         what a CI log viewer gives you, and it makes the seam disappear. -->
+    <label class="toggle" title="Off: commit every line immediately, with no rewritable region — the way a CI log behaves">
+      <!-- Not id="live": that belongs to the live window's container below, and
+           getElementById would hand this control to the renderer instead. -->
+      <input type="checkbox" id="live-window" checked>
+      <span>Live window</span>
+    </label>
+    <button id="run" class="btn btn-primary">Run</button>
+    <button id="stop" class="btn" disabled>Stop</button>
+  </div>
+</header>
+
+<!-- The pipeline strip is the page's thesis: the six stages a byte passes
+     through, in order, each showing what it has handled so far. -->
+<section class="pipeline" aria-label="Pipeline stages">
+  <div class="stage">
+    <span class="stage-n">bash</span>
+    <span class="stage-v" id="m-script">—</span>
+    <span class="stage-d">pipes, forced colour</span>
+  </div>
+  <div class="stage">
+    <span class="stage-n">batch</span>
+    <span class="stage-v" id="m-bytes">0 B</span>
+    <span class="stage-d">read eagerly, flushed on a tick</span>
+  </div>
+  <div class="stage">
+    <span class="stage-n">screen</span>
+    <span class="stage-v" id="m-screen">—</span>
+    <span class="stage-d">terminal-to-html, bounded buffer</span>
+  </div>
+  <div class="stage">
+    <span class="stage-n">envelope</span>
+    <span class="stage-v" id="m-env">0</span>
+    <span class="stage-d">one JSON record per event</span>
+  </div>
+  <div class="stage">
+    <span class="stage-n">sse</span>
+    <span class="stage-v" id="m-conn">idle</span>
+    <span class="stage-d">resumable by sequence number</span>
+  </div>
+  <div class="stage">
+    <span class="stage-n">dom</span>
+    <span class="stage-v" id="m-lines">0 lines</span>
+    <span class="stage-d">append finalized, replace live</span>
+  </div>
+</section>
+
+<main class="panes">
+
+  <section class="pane pane-term">
+    <div class="pane-head">
+      <h2>Output</h2>
+      <div class="pane-tools">
+        <span class="chip" id="state" data-state="idle">idle</span>
+        <label class="toggle">
+          <input type="checkbox" id="follow" checked>
+          <span>Follow</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="well" id="well">
+      <div class="empty" id="empty">
+        <p>No run yet.</p>
+        <p class="empty-sub">Pick a script and press Run. Output appears here as it is produced.</p>
+      </div>
+
+      <!-- Immutable region. Every line here has scrolled out of the emulated
+           screen, so nothing the process writes later can address it. -->
+      <div class="region region-final">
+        <div class="term-container" id="finalized"></div>
+      </div>
+
+      <!-- The seam. This is normally hidden in log viewers; here it is the
+           point, because it marks exactly where "written down" ends and
+           "still being repainted" begins. -->
+      <div class="seam" id="seam" hidden>
+        <span class="seam-label">live window</span>
+        <span class="seam-note">rewritable — carriage returns and cursor moves land above this line's content</span>
+      </div>
+
+      <!-- Mutable region. Replaced wholesale on every window envelope. -->
+      <div class="region region-live">
+        <div class="term-container" id="live"></div>
+      </div>
+
+      <div class="notices" id="notices"></div>
+    </div>
+  </section>
+
+  <section class="pane pane-wire">
+    <div class="pane-head">
+      <h2>Wire</h2>
+      <div class="pane-tools">
+        <button id="drop" class="btn btn-small" disabled>Drop the connection</button>
+        <button id="resume" class="btn btn-small" disabled>Resume</button>
+      </div>
+    </div>
+
+    <p class="pane-hint">
+      Every record below is exactly what crossed the network. Drop the
+      connection mid-run, then resume: the client sends the last sequence
+      number it applied and the server replays only what came after it.
+    </p>
+
+    <ol class="wire" id="wire"></ol>
+    <p class="wire-foot">
+      <a id="dl" href="#" hidden>Download the full envelope log (.jsonl)</a>
+    </p>
+  </section>
+
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>
